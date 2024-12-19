@@ -6,6 +6,25 @@ function App() {
   const [N, setN] = useState("");
   const [output, setOutput] = useState([]);
   const [isRunning, setIsRunning] = useState(false);
+  const [captchaToken, setCaptchaToken] = useState(null);
+
+  const handleCaptcha = async () => {
+    return new Promise((resolve) => {
+      const wafCaptcha = new window.AWSCaptcha({
+        containerID: "captcha-container",
+        renderStyle: "input",
+        successCallback: (token) => {
+          setCaptchaToken(token);
+          resolve(token);
+        },
+        errorCallback: (error) => {
+          console.error("Captcha error:", error);
+          resolve(null);
+        },
+      });
+      wafCaptcha.render();
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -17,13 +36,18 @@ function App() {
     setOutput([]);
     for (let i = 1; i <= N; i++) {
       try {
-        const response = await axios.get("https://api.prod.jcloudify.com/whoami");
+        const response = await axios.get("https://api.prod.jcloudify.com/whoami", {
+          headers: captchaToken ? { "x-captcha-token": captchaToken } : {},
+        });
         setOutput((prev) => [...prev, `${i}. ${response.data.message || "Forbidden"}`]);
       } catch (error) {
         if (error.response?.status === 403) {
-          // Gérer le captcha ici
-          alert("Captcha détecté, veuillez résoudre pour continuer.");
-          // Implémentez la logique du captcha
+          alert("Captcha détecté, veuillez le résoudre.");
+          const token = await handleCaptcha();
+          if (!token) {
+            alert("Le captcha n'a pas été validé.");
+            break;
+          }
         } else {
           setOutput((prev) => [...prev, `${i}. Forbidden`]);
         }
@@ -54,6 +78,8 @@ function App() {
             <li key={index}>{line}</li>
           ))}
         </ul>
+        {/* Conteneur pour le captcha AWS */}
+        <div id="captcha-container" style={{ marginTop: "20px" }}></div>
       </header>
     </div>
   );
