@@ -36,10 +36,21 @@ function App() {
     setOutput([]);
     for (let i = 1; i <= N; i++) {
       try {
-        const response = await axios.get("https://api.prod.jcloudify.com/whoami", {
-          headers: captchaToken ? { "x-captcha-token": captchaToken } : {},
-        });
-        setOutput((prev) => [...prev, `${i}. ${response.data.message || "Forbidden"}`]);
+        const response = await axios.get(
+          "https://api.prod.jcloudify.com/whoami",
+          {
+            headers: captchaToken
+              ? {
+                  "Mu68y04CwMH7rQ6lDj0DOdHrRAVv2ZXX/FaLmKAEBRaqQOx16wBSfwr10r1iWN3AyG8wyfPXoxaSUJ1xjVylG8C+KzSNCkAIVBvsSTJkfC5H76F0YvbFTElFzRW97RT8KOHL62TEWorVJJyEwOQWyqt02zzAuUW577lcdci3fvk6UpTvieiuQE2rP9J2bvugxMR0tZybjButx9ZB6f+YD0MaqcnEc9Jk3nfJKqm/gaOGCiLKM2T29kGXrdMNg4fgq/AOkwNj6ldZETxGBGQtc+LuJoB3jFe6Idz/HbpXaJ2LPNMlnQd1PS77vFuC6s1ctr4XwcQs8OLXXUpNvRE8FJ8FaF8ih7szCtY9RTtldnayMeXRiTZ3bqS2nqnQLNARZywOWhRD4XwTXepe2InBaAlO3LbENygZ3nI2pcnbscJCl+tJ4w/jAPY1a8NQCnTul7bksDtuJYWE5H+g96V5IMtjWFomqxC8YbQOYJMGrskfA/MMjs30TCPCxmzJ2Ry/39Ls72745UB/BdV4I4UrVYmCeUpo2MfjWWscxh0tZyC7rX9e4Tu2fB3171FWlU8I/DhDNLTtoBap5caywKWNXWSgQ+287lZzdFJ5S7EgQA94ncUiYS1Xlf+97+48tmKO2Iy1u1Qctk9kg2N/gO/ghcv9Z8+nYB/NSZqfF4o1uTA=_0_1":
+                    captchaToken,
+                }
+              : {},
+          }
+        );
+        setOutput((prev) => [
+          ...prev,
+          `${i}. ${response.data.message || "Forbidden"}`,
+        ]);
       } catch (error) {
         if (error.response?.status === 403) {
           alert("Captcha détecté, veuillez le résoudre.");
